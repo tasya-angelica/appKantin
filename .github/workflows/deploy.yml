@@ -40,7 +40,7 @@ jobs:
       - name: Deploy ke Docker Swarm lewat SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SWARM_MANAGER_IP }}
+          host: ${{ secrets.SSH_HOST }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
