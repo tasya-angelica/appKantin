@@ -24,6 +24,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -33,17 +34,16 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/appkantin:${{ github.sha }}
 
   deploy:
-    - name: Setup PHP
-     uses: shivammathur/setup-php@v2
-     with:
-       php-version: '8.2'
-
-   - name: Cek sintaks PHP
-     run: |
-       for f in $(find . -name '*.php'); do
-         php -l "$f" || exit 1
-       done
-
-   - name: Build and push Docker image
-     uses: docker/build-push-action@v6
-     # ... kode sisanya ...
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy ke Docker Swarm lewat SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SWARM_MANAGER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker service update \
+              --image ${{ secrets.DOCKERHUB_USERNAME }}/appkantin:${{ github.sha }} \
+              kantin
